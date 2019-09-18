@@ -26,7 +26,7 @@ func NewHttpClient(host string, opts ...Option) *Client {
 		header: map[string]string{
 			"Content-Type": "application/json",
 		},
-		showResponseLog: false,
+		showResponseLog: true,
 		timeout:         10 * time.Second,
 		attempts:        3,
 		delay:           500 * time.Millisecond,
