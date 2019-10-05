@@ -11,5 +11,9 @@ func TestDoGet(t *testing.T) {
 	httpClient := NewHttpClient(host, ShowResponseLog(true))
 	response := httpClient.DoGet("")
 	assert.Nil(t, response.Error)
-	response.AnalysisBody()
+	type Obj struct {
+	}
+	var obj Obj
+	err := response.AnalysisBody(&obj)
+	assert.Nil(t, err)
 }

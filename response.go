@@ -50,6 +50,7 @@ func (r Response) AnalysisBody(input interface{}) error {
 		logrus.Infof("Response [%s]%s%s : %s", r.ResponseConfig.method, r.ResponseConfig.host, r.ResponseConfig.url, string(bodyBytes))
 	}
 	if err := json.Unmarshal(bodyBytes, input); err != nil {
+		logrus.Errorf("An error occurred converting %s ;error : %v", string(bodyBytes), err)
 		return err
 	}
 	return nil
