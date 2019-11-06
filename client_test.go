@@ -1,37 +1,46 @@
 package client
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
-const host = ""
+const host = "http://localhost:8080"
 
-func TestDoGet(t *testing.T) {
-	httpClient := NewHttpClient(host, ShowResponseLog(true))
-	response := httpClient.DoGet("")
-	assert.Nil(t, response.Error)
-	type Obj struct {
-	}
-	var obj Obj
-	err := response.AnalysisBody(&obj)
-	assert.Nil(t, err)
+type UserResponse struct {
+	Code string `json:"code"`
+	Data *User  `json:"data"`
 }
 
-func TestDoPost(t *testing.T) {
-	httpClient := NewHttpClient(host, ShowResponseLog(true))
-	var input interface{}
-	inputJSON, err := json.Marshal(input)
+type User struct {
+	Id           string `json:"id"`
+	Name         string `json:"name"`
+	MobileNumber string `json:"mobileNumber"`
+}
+
+func TestDoGet(t *testing.T) {
+	httpClient := NewHttpClient(host)
+	response, err := httpClient.DoGet(fmt.Sprintf("/user-info/%s", "U5B5FC45D564F127D897B9258"))
 	if err != nil {
 		panic(err)
 	}
-	response := httpClient.DoPost("", bytes.NewBuffer(inputJSON))
-	assert.Nil(t, response.Error)
-	type Obj struct {
+	var res UserResponse
+	err = httpClient.AnalysisBody(response, &res)
+	if err != nil {
+		panic(err)
 	}
-	var obj Obj
-	err = response.AnalysisBody(&obj)
-	assert.Nil(t, err)
+	assert.EqualValues(t, res.Data.Id, "U5B5FC45D564F127D897B9258")
+	assert.EqualValues(t, res.Data.Name, "123")
+	assert.EqualValues(t, res.Data.MobileNumber, "+86176880808888")
+}
+
+func TestTimeOut(t *testing.T) {
+	httpClient := NewHttpClient(host, Header(map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+	}), Timeout(1*time.Millisecond))
+	response, err := httpClient.DoGet(fmt.Sprintf("/user-info/%s", "U5B5FC45D564F127D897B9258"))
+	assert.Nil(t, response)
+	assert.EqualValues(t, err, TimeOut)
 }
